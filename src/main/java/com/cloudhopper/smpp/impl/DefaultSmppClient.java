@@ -20,20 +20,17 @@ package com.cloudhopper.smpp.impl;
  * #L%
  */
 
-import com.cloudhopper.smpp.SmppClient;
-import com.cloudhopper.smpp.util.DaemonExecutors;
 import com.cloudhopper.smpp.SmppBindType;
-import com.cloudhopper.smpp.type.SmppChannelException;
+import com.cloudhopper.smpp.SmppClient;
 import com.cloudhopper.smpp.SmppSession;
 import com.cloudhopper.smpp.SmppSessionConfiguration;
 import com.cloudhopper.smpp.SmppSessionHandler;
 import com.cloudhopper.smpp.channel.SmppChannelConstants;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
 import com.cloudhopper.smpp.channel.SmppClientConnector;
-import com.cloudhopper.smpp.channel.SmppSessionPduDecoder;
 import com.cloudhopper.smpp.channel.SmppSessionLogger;
-import com.cloudhopper.smpp.channel.SmppSessionWrapper;
+import com.cloudhopper.smpp.channel.SmppSessionPduDecoder;
 import com.cloudhopper.smpp.channel.SmppSessionThreadRenamer;
+import com.cloudhopper.smpp.channel.SmppSessionWrapper;
 import com.cloudhopper.smpp.pdu.BaseBind;
 import com.cloudhopper.smpp.pdu.BaseBindResp;
 import com.cloudhopper.smpp.pdu.BindReceiver;
@@ -45,12 +42,10 @@ import com.cloudhopper.smpp.type.RecoverablePduException;
 import com.cloudhopper.smpp.type.SmppBindException;
 import com.cloudhopper.smpp.type.SmppChannelConnectException;
 import com.cloudhopper.smpp.type.SmppChannelConnectTimeoutException;
+import com.cloudhopper.smpp.type.SmppChannelException;
+import com.cloudhopper.smpp.type.SmppTimeoutException;
 import com.cloudhopper.smpp.type.UnrecoverablePduException;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLEngine;
+import com.cloudhopper.smpp.util.DaemonExecutors;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -62,6 +57,12 @@ import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.handler.timeout.WriteTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.SSLEngine;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Default implementation to "bootstrap" client SMPP sessions (create & bind).
@@ -273,28 +274,36 @@ public class DefaultSmppClient implements SmppClient {
         // a socket address used to "bind" to the remote system
         InetSocketAddress socketAddr = new InetSocketAddress(host, port);
 
-	// set the timeout
-	this.clientBootstrap.setOption("connectTimeoutMillis", connectTimeoutMillis);
+        // set the timeout
+        this.clientBootstrap.setOption("connectTimeoutMillis", connectTimeoutMillis);
 
         // attempt to connect to the remote system
         ChannelFuture connectFuture = this.clientBootstrap.connect(socketAddr);
-        
-        // wait until the connection is made successfully
-	// boolean timeout = !connectFuture.await(connectTimeoutMillis);
-	// BAD: using .await(timeout)
-	//      see http://netty.io/3.9/api/org/jboss/netty/channel/ChannelFuture.html
-	connectFuture.awaitUninterruptibly();
-	//assert connectFuture.isDone();
 
-	if (connectFuture.isCancelled()) {
-	    throw new InterruptedException("connectFuture cancelled by user");
-	} else if (!connectFuture.isSuccess()) {
-	    if (connectFuture.getCause() instanceof org.jboss.netty.channel.ConnectTimeoutException) {
-		throw new SmppChannelConnectTimeoutException("Unable to connect to host [" + host + "] and port [" + port + "] within " + connectTimeoutMillis + " ms", connectFuture.getCause());
-	    } else {
-		throw new SmppChannelConnectException("Unable to connect to host [" + host + "] and port [" + port + "]: " + connectFuture.getCause().getMessage(), connectFuture.getCause());
-	    }
-	}
+        // Wait until the connection is made successfully.
+        // According to the netty documentation it is bad to use .await(timeout). Instead
+        //     b.setOption("connectTimeoutMillis", 10000);
+        // should be used. See http://netty.io/3.9/api/org/jboss/netty/channel/ChannelFuture.html
+        // It turns out that under certain unknown circumstances the connect waits forever: https://github.com/twitter/cloudhopper-smpp/issues/117
+        // That's why the future is canceled 1 second after the specified timeout.
+        // This is a workaround and hopefully not needed after the switch to netty 4.
+        if (!connectFuture.await(connectTimeoutMillis + 1000)) {
+            logger.error("connectFuture did not finish in expected time! Try to cancel the connectFuture");
+            boolean isCanceled = connectFuture.cancel();
+            logger.error("connectFuture: isCanceled {} isDone {} isSuccess {}", isCanceled, connectFuture.isDone(), connectFuture.isSuccess());
+            throw new SmppChannelConnectTimeoutException("Could not connect to the server within timeout");
+        }
+
+
+        if (connectFuture.isCancelled()) {
+            throw new InterruptedException("connectFuture cancelled by user");
+        } else if (!connectFuture.isSuccess()) {
+            if (connectFuture.getCause() instanceof org.jboss.netty.channel.ConnectTimeoutException) {
+                throw new SmppChannelConnectTimeoutException("Unable to connect to host [" + host + "] and port [" + port + "] within " + connectTimeoutMillis + " ms", connectFuture.getCause());
+            } else {
+                throw new SmppChannelConnectException("Unable to connect to host [" + host + "] and port [" + port + "]: " + connectFuture.getCause().getMessage(), connectFuture.getCause());
+            }
+        }
 
         // if we get here, then we were able to connect and get a channel
         return connectFuture.getChannel();
