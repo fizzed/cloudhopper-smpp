@@ -28,6 +28,8 @@ import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
 public class ReplaceSmResp extends PduResponse {
 
+    private static final long serialVersionUID = 1L;
+
     public ReplaceSmResp() {
         super(SmppConstants.CMD_ID_REPLACE_SM_RESP, "replace_sm_resp");
     }

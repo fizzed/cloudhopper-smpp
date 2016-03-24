@@ -21,7 +21,9 @@ package com.cloudhopper.smpp.pdu;
  */
 
 public class PartialPdu extends EmptyBody<GenericNack> {
-    
+
+    private static final long serialVersionUID = 1L;
+
     public PartialPdu(int commandId) {
         super(commandId, "partial_pdu");
     }

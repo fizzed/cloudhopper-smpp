@@ -28,6 +28,8 @@ import com.cloudhopper.smpp.SmppConstants;
  */
 public class BindReceiver extends BaseBind<BindReceiverResp> {
 
+    private static final long serialVersionUID = 1L;
+
     public BindReceiver() {
         super(SmppConstants.CMD_ID_BIND_RECEIVER, "bind_receiver");
     }

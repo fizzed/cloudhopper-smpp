@@ -34,6 +34,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 public class ReplaceSm extends PduRequest<ReplaceSmResp> {
 
+    private static final long serialVersionUID = 1L;
+
     private String messageId;
     private Address sourceAddress;
     private String scheduleDeliveryTime;

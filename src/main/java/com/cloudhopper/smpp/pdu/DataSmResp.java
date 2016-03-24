@@ -24,6 +24,8 @@ import com.cloudhopper.smpp.SmppConstants;
 
 public class DataSmResp extends BaseSmResp {
 
+    private static final long serialVersionUID = 1L;
+
     public DataSmResp() {
         super(SmppConstants.CMD_ID_DATA_SM_RESP, "data_sm_resp");
     }

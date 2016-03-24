@@ -33,6 +33,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
  */
 public abstract class BaseBindResp extends PduResponse {
 
+    private static final long serialVersionUID = 1L;
+
     private String systemId;
 
     public BaseBindResp(int commandId, String name) {
