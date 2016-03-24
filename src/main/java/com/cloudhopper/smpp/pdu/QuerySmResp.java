@@ -36,6 +36,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
  */
 public class QuerySmResp extends PduResponse {
 
+    private static final long serialVersionUID = 1L;
+
     private String messageId;
     private String finalDate;
     private byte messageState;

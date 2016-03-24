@@ -25,7 +25,9 @@ import com.cloudhopper.smpp.type.RecoverablePduException;
 import org.jboss.netty.buffer.ChannelBuffer;
 
 public abstract class EmptyBody<R extends PduResponse> extends PduRequest<R> {
-    
+
+    private static final long serialVersionUID = 1L;
+
     public EmptyBody(int commandId, String name) {
         super(commandId, name);
     }

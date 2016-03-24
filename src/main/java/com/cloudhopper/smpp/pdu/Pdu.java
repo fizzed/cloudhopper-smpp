@@ -27,11 +27,15 @@ import com.cloudhopper.smpp.SmppConstants;
 import com.cloudhopper.smpp.tlv.Tlv;
 import com.cloudhopper.smpp.transcoder.PduTranscoderContext;
 import com.cloudhopper.smpp.util.ChannelBufferUtil;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public abstract class Pdu {
-    
+public abstract class Pdu implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final String name;
     private final boolean isRequest;
     private Integer commandLength;          // we'll know the size not calculated yet if null
@@ -52,7 +56,7 @@ public abstract class Pdu {
         this.referenceObject = null;
     }
 
-    public void setReferenceObject(Object value) {
+    public <T extends Serializable> void setReferenceObject(T value) {
         this.referenceObject = value;
     }
 
