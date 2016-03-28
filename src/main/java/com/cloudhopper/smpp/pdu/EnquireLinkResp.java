@@ -24,6 +24,8 @@ import com.cloudhopper.smpp.SmppConstants;
 
 public class EnquireLinkResp extends EmptyBodyResp {
 
+    private static final long serialVersionUID = 1L;
+
     public EnquireLinkResp() {
         super(SmppConstants.CMD_ID_ENQUIRE_LINK_RESP, "enquire_link_resp");
     }

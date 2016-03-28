@@ -24,6 +24,8 @@ import com.cloudhopper.smpp.SmppConstants;
 
 public class DeliverSm extends BaseSm<DeliverSmResp> {
 
+    private static final long serialVersionUID = 1L;
+
     public DeliverSm() {
         super(SmppConstants.CMD_ID_DELIVER_SM, "deliver_sm");
     }

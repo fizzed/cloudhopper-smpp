@@ -29,6 +29,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 public class DataSm extends BaseSm<DataSmResp> {
 
+    private static final long serialVersionUID = 1L;
+
     public DataSm() {
         super(SmppConstants.CMD_ID_DATA_SM, "data_sm");
     }

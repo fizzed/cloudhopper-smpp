@@ -24,6 +24,8 @@ import com.cloudhopper.smpp.SmppConstants;
 
 public class SubmitSmResp extends BaseSmResp {
 
+    private static final long serialVersionUID = 1L;
+
     public SubmitSmResp() {
         super(SmppConstants.CMD_ID_SUBMIT_SM_RESP, "submit_sm_resp");
     }

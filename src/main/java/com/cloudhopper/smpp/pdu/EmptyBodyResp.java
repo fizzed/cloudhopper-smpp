@@ -26,6 +26,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 public abstract class EmptyBodyResp extends PduResponse {
 
+    private static final long serialVersionUID = 1L;
+
     public EmptyBodyResp(int commandId, String name) {
         super(commandId, name);
     }

@@ -40,6 +40,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
  */
 public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 
+    private static final long serialVersionUID = 1L;
+
     protected String serviceType;
     protected Address sourceAddress;
     protected Address destAddress;

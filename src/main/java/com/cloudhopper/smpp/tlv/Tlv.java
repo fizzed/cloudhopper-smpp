@@ -22,6 +22,8 @@ package com.cloudhopper.smpp.tlv;
 
 import com.cloudhopper.commons.util.ByteArrayUtil;
 import com.cloudhopper.commons.util.HexUtil;
+
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
@@ -30,7 +32,9 @@ import java.util.Arrays;
  * 
  * @author joelauer (twitter: @jjlauer or <a href="http://twitter.com/jjlauer" target=window>http://twitter.com/jjlauer</a>)
  */
-public class Tlv {
+public class Tlv implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     
     private final short tag;
     private final byte[] value;     // length is stored in array

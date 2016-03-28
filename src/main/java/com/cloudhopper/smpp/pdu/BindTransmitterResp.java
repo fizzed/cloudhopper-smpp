@@ -24,6 +24,8 @@ import com.cloudhopper.smpp.SmppConstants;
 
 public class BindTransmitterResp extends BaseBindResp {
 
+    private static final long serialVersionUID = 1L;
+
     public BindTransmitterResp() {
         super(SmppConstants.CMD_ID_BIND_TRANSMITTER_RESP, "bind_transmitter_resp");
     }
