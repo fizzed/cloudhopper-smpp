@@ -27,6 +27,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 public class UnbindResp extends EmptyBodyResp {
 
+    private static final long serialVersionUID = 1L;
+
     public UnbindResp() {
         super(SmppConstants.CMD_ID_UNBIND_RESP, "unbind_resp");
     }

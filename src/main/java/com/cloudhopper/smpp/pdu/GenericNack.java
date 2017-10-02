@@ -27,6 +27,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 public class GenericNack extends PduResponse {
     
+    private static final long serialVersionUID = 1L;
+
     public GenericNack() {
         super(SmppConstants.CMD_ID_GENERIC_NACK, "generic_nack");
     }

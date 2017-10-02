@@ -27,10 +27,14 @@ import com.cloudhopper.smpp.SmppConstants;
 import com.cloudhopper.smpp.tlv.Tlv;
 import com.cloudhopper.smpp.transcoder.PduTranscoderContext;
 import com.cloudhopper.smpp.util.ChannelBufferUtil;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public abstract class Pdu {
+public abstract class Pdu implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     
     private final String name;
     private final boolean isRequest;
@@ -52,6 +56,7 @@ public abstract class Pdu {
         this.referenceObject = null;
     }
 
+    // value has to implement Serializable if serialization is used
     public void setReferenceObject(Object value) {
         this.referenceObject = value;
     }

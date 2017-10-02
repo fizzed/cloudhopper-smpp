@@ -32,6 +32,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
  */
 public class CancelSmResp extends PduResponse {
 
+    private static final long serialVersionUID = 1L;
+
     public CancelSmResp() {
         super(SmppConstants.CMD_ID_CANCEL_SM_RESP, "cancel_sm_resp");
     }

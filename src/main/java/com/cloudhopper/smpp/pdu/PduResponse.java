@@ -22,6 +22,8 @@ package com.cloudhopper.smpp.pdu;
 
 public abstract class PduResponse extends Pdu {
 
+    private static final long serialVersionUID = 1L;
+
     private String resultMessage;
     
     public PduResponse(int commandId, String name) {

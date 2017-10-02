@@ -24,6 +24,8 @@ import com.cloudhopper.smpp.SmppConstants;
 
 public class Unbind extends EmptyBody<UnbindResp> {
     
+    private static final long serialVersionUID = 1L;
+
     public Unbind() {
         super(SmppConstants.CMD_ID_UNBIND, "unbind");
     }

@@ -32,6 +32,8 @@ import com.cloudhopper.smpp.util.PduUtil;
 
 public class AlertNotification extends Pdu {
 
+    private static final long serialVersionUID = 1L;
+
     protected Address sourceAddress;
     protected Address esmeAddress;
 
