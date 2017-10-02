@@ -22,6 +22,7 @@ package com.cloudhopper.smpp.impl;
 
 // third party imports
 import com.cloudhopper.smpp.SmppBindType;
+import com.cloudhopper.smpp.SmppClientSession;
 import com.cloudhopper.smpp.SmppConstants;
 import com.cloudhopper.smpp.SmppServerConfiguration;
 import com.cloudhopper.smpp.SmppServerHandler;
@@ -124,7 +125,7 @@ public class DefaultSmppServerTest {
             DefaultSmppClient client0 = new DefaultSmppClient();
             SmppSessionConfiguration sessionConfig0 = createDefaultConfiguration();
             // this should actually work
-            SmppSession session0 = client0.bind(sessionConfig0);
+            SmppClientSession session0 = client0.bind(sessionConfig0);
 
             Thread.sleep(100);
 
@@ -158,7 +159,7 @@ public class DefaultSmppServerTest {
 
             // this should fail (invalid system id)
             try {
-                SmppSession session0 = client0.bind(sessionConfig0);
+                SmppClientSession session0 = client0.bind(sessionConfig0);
                 Assert.fail();
             } catch (SmppBindException e) {
                 Assert.assertEquals(SmppConstants.STATUS_INVSYSID, e.getBindResponse().getCommandStatus());
@@ -187,7 +188,7 @@ public class DefaultSmppServerTest {
 
             // this should fail (invalid password)
             try {
-                SmppSession session0 = client0.bind(sessionConfig0);
+                SmppClientSession session0 = client0.bind(sessionConfig0);
                 Assert.fail();
             } catch (SmppBindException e) {
                 Assert.assertEquals(SmppConstants.STATUS_INVPASWD, e.getBindResponse().getCommandStatus());
@@ -214,7 +215,7 @@ public class DefaultSmppServerTest {
 
             // we will not use the proper method of binding since we need to 
             // access the bind response to verify it's correct
-            DefaultSmppSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
+            SmppClientSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
 
             // create a bind request based on this config
             BaseBind bindRequest = client0.createBindRequest(sessionConfig0);
@@ -271,7 +272,7 @@ public class DefaultSmppServerTest {
 
             // we will not use the proper method of binding since we need to
             // access the bind response to verify it's correct
-            DefaultSmppSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
+            SmppClientSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
 
             // create a bind request based on this config
             BaseBind bindRequest = client0.createBindRequest(sessionConfig0);
@@ -328,7 +329,7 @@ public class DefaultSmppServerTest {
 
             // we will not use the proper method of binding since we need to
             // access the bind response to verify it's correct
-            DefaultSmppSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
+            SmppClientSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
 
             // create a bind request based on this config
             BaseBind bindRequest = client0.createBindRequest(sessionConfig0);
@@ -389,7 +390,7 @@ public class DefaultSmppServerTest {
 
             // we will not use the proper method of binding since we need to
             // access the bind response to verify it's correct
-            DefaultSmppSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
+            SmppClientSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
 
             // create a bind request based on this config
             BaseBind bindRequest = client0.createBindRequest(sessionConfig0);
@@ -447,7 +448,7 @@ public class DefaultSmppServerTest {
             SmppSessionConfiguration sessionConfig0 = createDefaultConfiguration();
 
             // we will not use the proper method of binding since we need to
-            DefaultSmppSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
+            SmppClientSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
 
             // there is a bind timeout of 50 ms and we'll wait 100 ms
             Thread.sleep(100);
@@ -519,7 +520,7 @@ public class DefaultSmppServerTest {
                 SmppSessionConfiguration sessionConfig0 = createDefaultConfiguration();
                 sessionConfig0.setName("WorkerTest.Session." + i);
                 // don't use default method of binding, connect the socket first
-                DefaultSmppSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
+                SmppClientSession session0 = client0.doOpen(sessionConfig0, new DefaultSmppSessionHandler());
                 // try to bind and execute a bind request and wait for a bind response
                 BaseBind bindRequest = client0.createBindRequest(sessionConfig0);
                 try {
