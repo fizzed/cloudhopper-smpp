@@ -49,6 +49,8 @@ import com.cloudhopper.smpp.pdu.QuerySm;
 import com.cloudhopper.smpp.pdu.QuerySmResp;
 import com.cloudhopper.smpp.pdu.ReplaceSm;
 import com.cloudhopper.smpp.pdu.ReplaceSmResp;
+import com.cloudhopper.smpp.pdu.SubmitMulti;
+import com.cloudhopper.smpp.pdu.SubmitMultiResp;
 import com.cloudhopper.smpp.pdu.SubmitSm;
 import com.cloudhopper.smpp.pdu.SubmitSmResp;
 import com.cloudhopper.smpp.pdu.Unbind;
@@ -181,6 +183,8 @@ public class DefaultPduTranscoder implements PduTranscoder {
                 pdu = new Unbind();
             } else if (commandId == SmppConstants.CMD_ID_ALERT_NOTIFICATION) {
                 pdu = new AlertNotification();
+            } else if (commandId == SmppConstants.CMD_ID_SUBMIT_MULTI) {
+                pdu = new SubmitMulti();
             } else {
                 pdu = new PartialPdu(commandId);
             }
@@ -209,6 +213,8 @@ public class DefaultPduTranscoder implements PduTranscoder {
                 pdu = new UnbindResp();
             } else if (commandId == SmppConstants.CMD_ID_GENERIC_NACK) {
                 pdu = new GenericNack();
+            } else if (commandId == SmppConstants.CMD_ID_SUBMIT_MULTI_RESP) {
+                pdu = new SubmitMultiResp();
             } else {
                 pdu = new PartialPduResp(commandId);
             }
