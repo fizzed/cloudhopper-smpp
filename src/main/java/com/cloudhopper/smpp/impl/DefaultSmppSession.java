@@ -516,6 +516,11 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
             }
         }
 
+        if (!this.channel.isOpen()) {
+            logger.info("Channel closed.");
+            return future;
+        }
+
         // we need to log the PDU after encoding since some things only happen
         // during the encoding process such as looking up the result message
         if (configuration.getLoggingOptions().isLogPduEnabled()) {
