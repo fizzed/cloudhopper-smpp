@@ -35,6 +35,8 @@ import com.cloudhopper.smpp.type.SmppBindException;
 import com.cloudhopper.smpp.type.SmppChannelException;
 import com.cloudhopper.smpp.type.SmppProcessingException;
 import java.util.HashSet;
+
+import com.cloudhopper.smpp.type.SmppTimeoutException;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -456,9 +458,9 @@ public class DefaultSmppServerTest {
             BaseBind bindRequest = client0.createBindRequest(sessionConfig0);
 
             try {
-                BaseBindResp bindResponse = session0.bind(bindRequest, 200);
+                BaseBindResp bindResponse = session0.bind(bindRequest, 50);
                 Assert.fail();
-            } catch (SmppChannelException e) {
+            } catch (SmppTimeoutException e) {
                 // correct behavior
             }
 
