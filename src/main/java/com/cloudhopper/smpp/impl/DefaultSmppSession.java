@@ -507,6 +507,11 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
             }
         }
 
+        if (!this.channel.isOpen()) {
+            logger.info("Channel closed.");
+            return future;
+        }
+
         // write the pdu out & wait timeout amount of time
         ChannelFuture channelFuture = this.channel.writeAndFlush(buffer);
         if (configuration.getWriteTimeout() > 0){
