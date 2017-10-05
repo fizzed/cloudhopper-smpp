@@ -461,8 +461,9 @@ public class DefaultSmppServerTest {
             try {
                 BaseBindResp bindResponse = session0.bind(bindRequest, 200);
                 Assert.fail();
-            } catch (SmppChannelException e) {
+            } catch (SmppTimeoutException e) {
                 // correct behavior
+                logger.debug("Got expected timeout exception {}", e.getMessage());
             }
 
             // verify everything after the session timed out
