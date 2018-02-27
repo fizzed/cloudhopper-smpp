@@ -78,7 +78,7 @@ public class DefaultSmppServer implements SmppServer, DefaultSmppServerMXBean {
     private ExecutorService bossThreadPool;
     private ChannelFactory channelFactory;
     private ServerBootstrap serverBootstrap;
-    private Channel serverChannel; 
+    private ChannelGroup serverChannel;
     // shared instance of a timer for session writeTimeout timing
     private final org.jboss.netty.util.Timer writeTimeoutTimer;
     // shared instance of a timer background thread to close unbound channels
@@ -223,7 +223,14 @@ public class DefaultSmppServer implements SmppServer, DefaultSmppServerMXBean {
     
     @Override
     public boolean isStarted() {
-        return (this.serverChannel != null && this.serverChannel.isBound());
+        if (serverChannel == null) {
+            return false;
+        }
+        boolean allStarted = true;
+        for(Channel channel : serverChannel) {
+            allStarted = allStarted && channel.isBound();
+        }
+        return allStarted;
     }
 
     @Override
@@ -242,8 +249,14 @@ public class DefaultSmppServer implements SmppServer, DefaultSmppServerMXBean {
             throw new SmppChannelException("Unable to start: server is destroyed");
         }
         try {
-            serverChannel = this.serverBootstrap.bind(new InetSocketAddress(configuration.getHost(), configuration.getPort()));
+            serverChannel = new DefaultChannelGroup();
+            serverChannel.add(this.serverBootstrap.bind(new InetSocketAddress(configuration.getHost(), configuration.getPort())));
             logger.info("{} started at {}:{}", configuration.getName(), configuration.getHost(), configuration.getPort());
+            if (configuration.isUseSsl() && configuration.getSslPort() != null) {
+                serverChannel.add(this.serverBootstrap.bind(new InetSocketAddress(configuration.getHost(), configuration.getSslPort())));
+                logger.info("{} started at {}:{} (SSL)", configuration.getName(), configuration.getHost(), configuration.getSslPort());
+            }
+
         } catch (ChannelException e) {
             throw new SmppChannelException(e.getMessage(), e);
         }

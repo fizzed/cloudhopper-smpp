@@ -21,6 +21,7 @@ package com.cloudhopper.smpp.channel;
  */
 
 
+import com.cloudhopper.smpp.SmppServerConfiguration;
 import com.cloudhopper.smpp.impl.DefaultSmppServer;
 import com.cloudhopper.smpp.impl.UnboundSmppSession;
 import com.cloudhopper.smpp.ssl.SslConfiguration;
@@ -35,6 +36,9 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * Channel handler for server SMPP sessions.
@@ -66,23 +70,27 @@ public class SmppServerConnector extends SimpleChannelUpstreamHandler {
         // create a default "unbound" thread name for the thread processing the channel
         // this will create a name of "RemoteIPAddress.RemotePort"
         String channelName = ChannelUtil.createChannelName(channel);
-        String threadName = server.getConfiguration().getName() + ".UnboundSession." + channelName;
+        SmppServerConfiguration serverConfig = server.getConfiguration();
+        String threadName = serverConfig.getName() + ".UnboundSession." + channelName;
 
         // rename the current thread for logging, then rename it back
         String currentThreadName = Thread.currentThread().getName();
-        Thread.currentThread().setName(server.getConfiguration().getName());
+        Thread.currentThread().setName(serverConfig.getName());
         logger.info("New channel from [{}]", channelName);
         Thread.currentThread().setName(currentThreadName);
 
-	// add SSL handler
-        if (server.getConfiguration().isUseSsl()) {
-	    SslConfiguration sslConfig = server.getConfiguration().getSslConfiguration();
-	    if (sslConfig == null) throw new IllegalStateException("sslConfiguration must be set");
-	    SslContextFactory factory = new SslContextFactory(sslConfig);
-	    SSLEngine sslEngine = factory.newSslEngine();
-	    sslEngine.setUseClientMode(false);
-	    channel.getPipeline().addLast(SmppChannelConstants.PIPELINE_SESSION_SSL_NAME, new SslHandler(sslEngine));
-	}
+        // add SSL handler
+        if (serverConfig.isUseSsl()
+                && ((serverConfig.getSslPort() != null
+                    && channel.getLocalAddress() instanceof InetSocketAddress
+                    && ((InetSocketAddress)channel.getLocalAddress()).getPort() == serverConfig.getSslPort()) || serverConfig.getSslPort() == null)) {
+            SslConfiguration sslConfig = serverConfig.getSslConfiguration();
+            if (sslConfig == null) throw new IllegalStateException("sslConfiguration must be set");
+            SslContextFactory factory = new SslContextFactory(sslConfig);
+            SSLEngine sslEngine = factory.newSslEngine();
+            sslEngine.setUseClientMode(false);
+            channel.getPipeline().addLast(SmppChannelConstants.PIPELINE_SESSION_SSL_NAME, new SslHandler(sslEngine));
+        }
 
         // add a new instance of a thread renamer
         channel.getPipeline().addLast(SmppChannelConstants.PIPELINE_SESSION_THREAD_RENAMER_NAME, new SmppSessionThreadRenamer(threadName));

@@ -4,7 +4,9 @@ The purpose of this document is to provide a summary of how to configuration SSL
 
 ## Configuring a SMPP server with SSL transport
 
-### Example:
+There are two ways to use SSL on the server side: Either SSL only or non-SSL and SSL on separate ports (added in version 5.0.x).
+
+### Example for SSL only:
 
     // Configure the server as you normally would:
     SmppServerConfiguration configuration = new SmppServerConfiguration();
@@ -23,6 +25,27 @@ The purpose of this document is to provide a summary of how to configuration SSL
     // And add it to the server configuration:
     configuration.setUseSsl(true);
     configuration.setSslConfiguration(sslConfig);
+
+### Example for non-SSL and SSL:
+
+    // Configure the server as you normally would:
+    SmppServerConfiguration configuration = new SmppServerConfiguration();
+    configuration.setPort(2776); // 2776 serves unencrypted traffic
+    ...
+
+    // Then create a SSL configuration:
+    SslConfiguration sslConfig = new SslConfiguration();
+    sslConfig.setKeyStorePath("path/to/keystore");
+    sslConfig.setKeyStorePassword("changeit");
+    sslConfig.setKeyManagerPassword("changeit");
+    sslConfig.setTrustStorePath("path/to/keystore");
+    sslConfig.setTrustStorePassword("changeit");
+    ...
+
+    // And add it to the server configuration:
+    configuration.setUseSsl(true);
+    configuration.setSslConfiguration(sslConfig);
+    configuration.setSslPort(2777); // 2777 serves SSL-encrypted traffic
 
 
 ### Require client auth
