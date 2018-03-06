@@ -58,6 +58,7 @@ public class SmppServerConfiguration extends SmppConnectionConfiguration {
     private long defaultRequestExpiryTimeout = SmppConstants.DEFAULT_REQUEST_EXPIRY_TIMEOUT;
     private long defaultWindowMonitorInterval = SmppConstants.DEFAULT_WINDOW_MONITOR_INTERVAL;
     private boolean defaultSessionCountersEnabled = false;
+    private Integer sslPort;
 
     public SmppServerConfiguration() {
         super("0.0.0.0", 2775, 5000l);
@@ -250,4 +251,19 @@ public class SmppServerConfiguration extends SmppConnectionConfiguration {
         this.defaultSessionCountersEnabled = defaultSessionCountersEnabled;
     }
 
+    /**
+     * @return the SSL Port, might be null
+     */
+    public Integer getSslPort() {
+        return sslPort;
+    }
+
+    /**
+     * Sets the SSL port. If you just set the normal port and use SSL, then the server only supports SSL on the normal port. If you specify the SSL
+     * port, then the server will listen to unencrypted connections on the normal and the SSL connections on the SSL port.
+     * @param sslPort
+     */
+    public void setSslPort(Integer sslPort) {
+        this.sslPort = sslPort;
+    }
 }
