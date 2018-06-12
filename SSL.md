@@ -51,6 +51,10 @@ The purpose of this document is to provide a summary of how to configuration SSL
     configuration.setSslConfiguration(sslConfig);
     configuration.setUseSsl(true);
 
+### Protocols
+
+    sslConfig.addExcludeProtocols("TLSv1.0", "TLSv1.1", "SSLv2Hello");
+
 ### Validate certificates
 
     sslConfig.setValidateCerts(true);
