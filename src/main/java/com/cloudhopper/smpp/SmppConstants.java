@@ -62,8 +62,8 @@ public class SmppConstants {
     //
     // SUBMIT_MULTI destination type flags
     //
-    //public static final int SME_ADDRESS = 1;
-    //public static final int DISTRIBUTION_LIST_NAME = 2;
+    public static final int SME_ADDRESS = 1;
+    public static final int DISTRIBUTION_LIST_NAME = 2;
 
     //
     // SMPP Command ID (Requests)
@@ -124,6 +124,10 @@ public class SmppConstants {
     public static final short TAG_DEST_SUBADDRESS = 0x0203;
     public static final short TAG_CALLBACK_NUM = 0x0381;
     public static final short TAG_MESSAGE_PAYLOAD = 0x0424;
+    public static final short TAG_IMSI = 0x057B;
+    public static final short TAG_NNN_DIGITS = 0x57C;
+    public static final short TAG_NNN_TON = 0x57D;
+    public static final short TAG_NNN_NPI = 0x57E;
     // SC Interface Version
     public static final short TAG_SC_INTERFACE_VERSION = 0x0210;
     // Display Time
@@ -600,6 +604,10 @@ public class SmppConstants {
         TAG_NAME_MAP.put(TAG_DEST_SUBADDRESS, "dest_subaddr");
         TAG_NAME_MAP.put(TAG_CALLBACK_NUM, "callback_num");
         TAG_NAME_MAP.put(TAG_MESSAGE_PAYLOAD, "message_payload");
+        TAG_NAME_MAP.put(TAG_IMSI, "imsi");
+        TAG_NAME_MAP.put(TAG_NNN_DIGITS, "nnn_digits");
+        TAG_NAME_MAP.put(TAG_NNN_TON, "nnn_ton");
+        TAG_NAME_MAP.put(TAG_NNN_NPI,"nnn_npi");
         TAG_NAME_MAP.put(TAG_SC_INTERFACE_VERSION, "sc_interface_version");
         TAG_NAME_MAP.put(TAG_DISPLAY_TIME, "display_time");
         TAG_NAME_MAP.put(TAG_MS_VALIDITY, "ms_validity");

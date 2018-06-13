@@ -1,33 +1,33 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.fizzed</groupId>
+    <groupId>org.restcomm.smpp</groupId>
     <artifactId>ch-smpp</artifactId>
     <packaging>jar</packaging>
     <version>5.0.10-SNAPSHOT</version>
     <name>ch-smpp</name>
     <description>Efficient, scalable, and flexible Java implementation of the Short Messaging Peer to Peer Protocol (SMPP)</description>
-    <url>https://github.com/twitter/cloudhopper-smpp</url>
+    <url>https://github.com/Restcomm/cloudhopper-smpp</url>
     <inceptionYear>2009</inceptionYear>
     
     <scm>
-        <url>https://github.com/fizzed/cloudhopper-smpp</url>
-        <connection>scm:git:https://github.com/fizzed/cloudhopper-smpp.git</connection>
-        <developerConnection>scm:git:git@github.com:fizzed/cloudhopper-smpp.git</developerConnection>
+        <url>https://github.com/Restcomm/cloudhopper-smpp</url>
+        <connection>scm:git:https://github.com/Restcomm/cloudhopper-smpp.git</connection>
+        <developerConnection>scm:git:git@github.com:Restcomm/cloudhopper-smpp.git</developerConnection>
         <tag>master</tag>
     </scm>
   
     <parent>
-        <groupId>com.fizzed</groupId>
-        <artifactId>fizzed-maven-parent</artifactId>
-        <version>1.15</version>
+	<groupId>org.restcomm</groupId>
+	<artifactId>restcomm-parent</artifactId>
+	<version>3.0.5</version>
     </parent>
-    
+
     <properties>
         <main.java.package>com.cloudhopper.smpp</main.java.package>
-        <ch-commons-util.version>6.0.2</ch-commons-util.version>
-        <ch-commons-charset.version>3.0.2</ch-commons-charset.version>
-        <ch-commons-gsm.version>3.0.0</ch-commons-gsm.version>
+        <ch-commons-util.version>7.0.6</ch-commons-util.version>
+        <ch-commons-charset.version>7.0.6</ch-commons-charset.version>
+        <ch-commons-gsm.version>7.0.6</ch-commons-gsm.version>
         <netty.version>3.9.6.Final</netty.version>
         <slf4j.version>1.7.13</slf4j.version>
         <!-- workaround travis ci maven version requirement -->
@@ -37,12 +37,12 @@
     <dependencies>
         <!-- compile scope -->
         <dependency>
-            <groupId>com.cloudhopper</groupId>
+            <groupId>org.restcomm.smpp</groupId>
             <artifactId>ch-commons-util</artifactId>
             <version>${ch-commons-util.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cloudhopper</groupId>
+            <groupId>org.restcomm.smpp</groupId>
             <artifactId>ch-commons-charset</artifactId>
             <version>${ch-commons-charset.version}</version>
         </dependency>
@@ -66,9 +66,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.cloudhopper</groupId>
+            <groupId>org.restcomm.smpp</groupId>
             <artifactId>ch-commons-gsm</artifactId>
-            <version>3.0.0</version>
+            <version>7.0.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,3 +1,5 @@
+[Try Restcomm Cloud NOW for FREE!](https://www.restcomm.com/sign-up/) Zero download and install required.
+=======
 Cloudhopper SMPP by Fizzed (forked from Twitter) 
 ================================================
 
@@ -66,79 +68,14 @@ Installation
 
 Library is available via maven central.  For netty-3 and a stable version:
 
-    <dependency>
-      <groupId>com.fizzed</groupId>
-      <artifactId>ch-smpp</artifactId>
-      <version>5.0.9</version>
-    </dependency>
 
-For netty-4 and a little more bleeding edge.  Visit [netty-4 branch](https://github.com/fizzed/cloudhopper-smpp/tree/netty4)
+[![Build Status](https://travis-ci.org/RestComm/cloudhopper-smpp.svg?branch=master)](https://travis-ci.org/RestComm/cloudhopper-smpp)
 
-    <dependency>
-      <groupId>com.fizzed</groupId>
-      <artifactId>ch-smpp</artifactId>
-      <version>6.0.0-netty4-beta-3</version>
-    </dependency>
+News
+------------------------
 
-Demo Code / Tutorials
----------------------
+**Nov 2016**
 
-There are numerous examples of how to use various parts of this library:
+While Fizzed, Inc. took over from Twitter for a while, there is now an apparent lack of commits on the original repository for almost a year and PR pending reviews for more than 6 months.
+The project was forked here and will be updated regularly as it is being used in Restcomm SMSC
 
-    src/test/java/com/cloudhopper/smpp/demo/
-
-To run some of the samples, there is a Makefile to simplify the syntax required
-by Maven:
-
-    make client
-    make server
-    make performance-client
-    make simulator
-    make rebind
-    make parser
-    make dlr
-    make ssl-client
-    make ssl-server
-    make persist-client
-    make server-echo
-
-On Windows, the examples can run with `nmake` instead of `make`.
-
-The easiest way to get started is to try out our `server` and `client` or `ssl-server`
-and `ssl-client` examples. Open up two shells.  In the first shell, run:
-
-    make server
-
-In the second shell, run:
-
-    make client
-
-You'll see the client bind to the server and a few different type of requests
-exchanged back and forth.
-
-You can also try `make persist-client` instead of `make client` which demonstrates a persistent SMPP connection.
-
-`make server-echo` will echo back any MT as an MO. This makes it easier to test handling of MO messages.
-
-User Contributed Demos
-----------------------
-
-A more complete persistent client demo:
-
-(https://github.com/krasa/cloudhopper-smpp/tree/persistent-connection/src/test/java/com/cloudhopper/smpp/demo/persist)
-
-A tutorial in Russian:
-
-https://github.com/wizardjedi/my-spring-learning/wiki/Twitter-cloudhopper
-
-Please let us know if you have other tutorials worth mentioning!
-
-
-License
--------
-
-Copyright (C) 2015+ Fizzed, Inc.
-Copyright (C) 2009-2015 Twitter, Inc.
-Copyright (C) 2008-2009 Cloudhopper, Inc.
-
-This work is licensed under the Apache License, Version 2.0. See LICENSE for details.

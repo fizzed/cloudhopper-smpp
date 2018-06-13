@@ -24,6 +24,7 @@ package com.cloudhopper.smpp.transcoder;
 import com.cloudhopper.commons.util.HexString;
 import com.cloudhopper.smpp.pdu.*;
 import com.cloudhopper.smpp.type.Address;
+import com.cloudhopper.smpp.type.UnsucessfulSME;
 import com.cloudhopper.commons.util.HexUtil;
 import com.cloudhopper.smpp.SmppConstants;
 import com.cloudhopper.smpp.tlv.Tlv;
@@ -317,6 +318,52 @@ public class PduEncoderTest {
         ChannelBuffer buffer = transcoder.encode(pdu0);
         //logger.debug("{}", HexUtil.toHexString(BufferHelper.createByteArray(buffer)));
         Assert.assertArrayEquals(HexUtil.toByteArray("00000039000000040000000000004FE80001013430343034000101343439353133363139323000000000000001000000084024232125262F3A"), BufferHelper.createByteArray(buffer));
+    }
+    
+    @Test
+    public void encodeSubmitMulti() throws Exception {
+        SubmitMulti pdu0 = new SubmitMulti();
+
+        pdu0.setSequenceNumber(2);
+        pdu0.setServiceType("CMT");
+        
+        pdu0.setSourceAddress(new Address((byte)0x01, (byte)0x00, "1616"));
+        
+        pdu0.addDestAddresses(new Address((byte)0x01, (byte)0x00, "628176504657"));
+        pdu0.addDestAddresses(new Address((byte)0x01, (byte)0x00, "628176504658"));
+        
+        pdu0.setEsmClass((byte)0x00);
+        pdu0.setProtocolId((byte)0x00);
+        pdu0.setPriority((byte)0x01);
+        pdu0.setScheduleDeliveryTime(null);
+        pdu0.setValidityPeriod(null);
+        pdu0.setRegisteredDelivery((byte)0x02);
+        pdu0.setReplaceIfPresent((byte)0x01);
+        pdu0.setDataCoding((byte)0x11);
+        pdu0.setDefaultMsgId((byte)0x00);
+        pdu0.setShortMessage(HexUtil.toByteArray("636c6f7564686f707065722d736d70702073696d706c7920617765736f6d65"));
+
+        ChannelBuffer buffer = transcoder.encode(pdu0);
+        //logger.debug("{}", HexUtil.toHexString(BufferHelper.createByteArray(buffer)));
+        Assert.assertArrayEquals(HexUtil.toByteArray("00000065000000210000000000000002434d5400010031363136000201010036323831373635303436353700010100363238313736353034363538000000010000020111001f636c6f7564686f707065722d736d70702073696d706c7920617765736f6d65"), BufferHelper.createByteArray(buffer));
+    }
+    
+    
+    @Test
+    public void encodeSubmitMultiResp() throws Exception {
+        SubmitMultiResp pdu0 = new SubmitMultiResp();
+        pdu0.setCommandStatus(0);
+        pdu0.setSequenceNumber(2);
+        pdu0.setMessageId("6802c438");
+        
+        Address address = new Address((byte)0x01, (byte)0x00, "628176504657");
+        UnsucessfulSME unsucessfulSME = new UnsucessfulSME(4, address);
+        
+        pdu0.addUnsucessfulSME(unsucessfulSME);
+        
+        ChannelBuffer buffer = transcoder.encode(pdu0);
+        Assert.assertArrayEquals(HexUtil.toByteArray("0000002d8000002100000000000000023638303263343338000101003632383137363530343635370000000004"), BufferHelper.createByteArray(buffer));
+        
     }
 
     @Test

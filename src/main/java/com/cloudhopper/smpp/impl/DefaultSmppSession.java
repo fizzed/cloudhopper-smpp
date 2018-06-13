@@ -340,7 +340,6 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
                 // bind failed for a specific reason
                 throw new SmppBindException(bindResponse);
             }
-
             // if we make it all the way here, we're good and bound
             bound = true;
 
@@ -373,7 +372,12 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
                 setBound();
             } else {
                 // the bind failed, we need to clean up resources
-                try { this.close(); } catch (Exception e) { }
+                try {
+                    logger.debug("Bound failed for systemId=" + request.getSystemId());
+                    this.close(); 
+                } catch (Exception e) {
+                    logger.debug("Exception after bind failed for systemId=" + request.getSystemId());
+                }
             }
         }
     }
@@ -527,12 +531,16 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
         }
 
         // write the pdu out & wait timeout amount of time
-	ChannelFuture channelFuture = this.channel.write(buffer).await();
-
+        ChannelFuture channelFuture = this.channel.write(buffer);
+        if(!channelFuture.await(timeoutMillis))
+            throw new SmppChannelException(channelFuture.getCause() != null ? channelFuture.getCause().getMessage() 
+                    : "ChannelFuture failed without cause." , channelFuture.getCause());
+        
         // check if the write was a success
         if (!channelFuture.isSuccess()) {
             // the write failed, make sure to throw an exception
-            throw new SmppChannelException(channelFuture.getCause().getMessage(), channelFuture.getCause());
+            throw new SmppChannelException(channelFuture.getCause() != null ? channelFuture.getCause().getMessage() 
+                    : "ChannelFuture failed without cause." , channelFuture.getCause());
         }
         
         this.countSendRequestPdu(pdu);
@@ -573,12 +581,17 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
         }
 
         // write the pdu out & wait timeout amount of time
-        ChannelFuture channelFuture = this.channel.write(buffer).await();
-
+        ChannelFuture channelFuture = this.channel.write(buffer);
+        //REQUESTED BY SERGEI VETUNIEV FOR TESTING
+        if(!channelFuture.await(10000))
+            throw new SmppChannelException(channelFuture.getCause() != null ? channelFuture.getCause().getMessage() 
+                    : "ChannelFuture failed without cause." , channelFuture.getCause());
+        
         // check if the write was a success
         if (!channelFuture.isSuccess()) {
             // the write failed, make sure to throw an exception
-            throw new SmppChannelException(channelFuture.getCause().getMessage(), channelFuture.getCause());
+            throw new SmppChannelException(channelFuture.getCause() != null ? channelFuture.getCause().getMessage() 
+                    : "ChannelFuture failed without cause." , channelFuture.getCause());
         }
     }
 
@@ -608,10 +621,9 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
             // if the handler returned a non-null object, then we need to send it back on the channel
             if (responsePdu != null) {
                 try {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    this.countSendResponsePdu(responsePdu, responseTime, responseTime);
-                    
-                    this.sendResponsePdu(responsePdu);
+                    countSendResponsePduProcessingTime(responsePdu, System.currentTimeMillis() - startTime);
+                    sendResponsePdu(responsePdu);
+                    countSendResponsePduResponseTime(responsePdu, System.currentTimeMillis() - startTime);
                 } catch (Exception e) {
                     logger.error("Unable to cleanly return response PDU: {}", e);
                 }
@@ -715,7 +727,9 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
     @Override
     public void expired(WindowFuture<Integer, PduRequest, PduResponse> future) {
         this.countSendRequestPduExpired(future.getRequest());
-        this.sessionHandler.firePduRequestExpired(future.getRequest());
+        if (this.sessionHandler != null) {
+            this.sessionHandler.firePduRequestExpired(future.getRequest());
+        }
     }
 
     private void countSendRequestPdu(PduRequest pdu) {
@@ -741,38 +755,57 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
         }
     }
     
-    private void countSendResponsePdu(PduResponse pdu, long responseTime, long estimatedProcessingTime) {
+    private void countSendResponsePduProcessingTime(PduResponse pdu, long estimatedProcessingTime) {
         if (this.counters == null) {
-            return;     // noop
+            return;
         }
-        
-        if (pdu.isResponse()) {
-            switch (pdu.getCommandId()) {
-                case SmppConstants.CMD_ID_SUBMIT_SM_RESP:
-                    this.counters.getRxSubmitSM().incrementResponseAndGet();
-                    this.counters.getRxSubmitSM().addRequestResponseTimeAndGet(responseTime);
-                    this.counters.getRxSubmitSM().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
-                    this.counters.getRxSubmitSM().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
-                    break;
-                case SmppConstants.CMD_ID_DELIVER_SM_RESP:
-                    this.counters.getRxDeliverSM().incrementResponseAndGet();
-                    this.counters.getRxDeliverSM().addRequestResponseTimeAndGet(responseTime);
-                    this.counters.getRxDeliverSM().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
-                    this.counters.getRxDeliverSM().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
-                    break;
-                case SmppConstants.CMD_ID_DATA_SM_RESP:
-                    this.counters.getRxDataSM().incrementResponseAndGet();
-                    this.counters.getRxDataSM().addRequestResponseTimeAndGet(responseTime);
-                    this.counters.getRxDataSM().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
-                    this.counters.getRxDataSM().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
-                    break;
-                case SmppConstants.CMD_ID_ENQUIRE_LINK_RESP:
-                    this.counters.getRxEnquireLink().incrementResponseAndGet();
-                    this.counters.getRxEnquireLink().addRequestResponseTimeAndGet(responseTime);
-                    this.counters.getRxEnquireLink().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
-                    this.counters.getRxEnquireLink().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
-                    break;
-            }
+        if (!pdu.isResponse()) {
+            return;
+        }
+        switch (pdu.getCommandId()) {
+            case SmppConstants.CMD_ID_SUBMIT_SM_RESP:
+                this.counters.getRxSubmitSM().incrementResponseAndGet();
+                this.counters.getRxSubmitSM().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
+                this.counters.getRxSubmitSM().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
+                break;
+            case SmppConstants.CMD_ID_DELIVER_SM_RESP:
+                this.counters.getRxDeliverSM().incrementResponseAndGet();
+                this.counters.getRxDeliverSM().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
+                this.counters.getRxDeliverSM().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
+                break;
+            case SmppConstants.CMD_ID_DATA_SM_RESP:
+                this.counters.getRxDataSM().incrementResponseAndGet();
+                this.counters.getRxDataSM().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
+                this.counters.getRxDataSM().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
+                break;
+            case SmppConstants.CMD_ID_ENQUIRE_LINK_RESP:
+                this.counters.getRxEnquireLink().incrementResponseAndGet();
+                this.counters.getRxEnquireLink().addRequestEstimatedProcessingTimeAndGet(estimatedProcessingTime);
+                this.counters.getRxEnquireLink().getResponseCommandStatusCounter().incrementAndGet(pdu.getCommandStatus());
+                break;
+        }
+    }
+    
+    private void countSendResponsePduResponseTime(PduResponse pdu, long responseTime) {
+        if (this.counters == null) {
+            return;
+        }
+        if (!pdu.isResponse()) {
+            return;
+        }
+        switch (pdu.getCommandId()) {
+            case SmppConstants.CMD_ID_SUBMIT_SM_RESP:
+                this.counters.getRxSubmitSM().addRequestResponseTimeAndGet(responseTime);
+                break;
+            case SmppConstants.CMD_ID_DELIVER_SM_RESP:
+                this.counters.getRxDeliverSM().addRequestResponseTimeAndGet(responseTime);
+                break;
+            case SmppConstants.CMD_ID_DATA_SM_RESP:
+                this.counters.getRxDataSM().addRequestResponseTimeAndGet(responseTime);
+                break;
+            case SmppConstants.CMD_ID_ENQUIRE_LINK_RESP:
+                this.counters.getRxEnquireLink().addRequestResponseTimeAndGet(responseTime);
+                break;
         }
     }
     
@@ -1023,6 +1056,46 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
     }
     
     @Override
+    public String getRxDataSMCounterAndReset() {
+        return hasCounters() ? this.counters.getRxDataSM().dumpAndReset() : null;
+    }
+
+    @Override
+    public String getRxDeliverSMCounterAndReset() {
+        return hasCounters() ? this.counters.getRxDeliverSM().dumpAndReset() : null;
+    }
+
+    @Override
+    public String getRxEnquireLinkCounterAndReset() {
+        return hasCounters() ? this.counters.getRxEnquireLink().dumpAndReset() : null;
+    }
+
+    @Override
+    public String getRxSubmitSMCounterAndReset() {
+        return hasCounters() ? this.counters.getRxSubmitSM().dumpAndReset() : null;
+    }
+
+    @Override
+    public String getTxDataSMCounterAndReset() {
+        return hasCounters() ? this.counters.getTxDataSM().dumpAndReset() : null;
+    }
+
+    @Override
+    public String getTxDeliverSMCounterAndReset() {
+        return hasCounters() ? this.counters.getTxDeliverSM().dumpAndReset() : null;
+    }
+
+    @Override
+    public String getTxEnquireLinkCounterAndReset() {
+        return hasCounters() ? this.counters.getTxEnquireLink().dumpAndReset() : null;
+    }
+
+    @Override
+    public String getTxSubmitSMCounterAndReset() {
+        return hasCounters() ? this.counters.getTxSubmitSM().dumpAndReset() : null;
+    }
+  
+    @Override
     public void enableLogBytes() {
         this.configuration.getLoggingOptions().setLogBytes(true);
     }
@@ -1041,4 +1114,5 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
     public void disableLogPdu() {
         this.configuration.getLoggingOptions().setLogPdu(false);
     }
+
 }
