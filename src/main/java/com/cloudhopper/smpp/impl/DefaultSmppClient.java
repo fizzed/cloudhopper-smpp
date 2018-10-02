@@ -221,12 +221,14 @@ public class DefaultSmppClient implements SmppClient {
 
     protected DefaultSmppSession doOpen(SmppSessionConfiguration config, SmppSessionHandler sessionHandler) throws SmppTimeoutException, SmppChannelException, InterruptedException {
         // create and connect a channel to the remote host
-        Channel channel = createConnectedChannel(config.getHost(), config.getPort(), config.getConnectTimeout());
+        Channel channel = createConnectedChannel(config);
         // tie this new opened channel with a new session
         return createSession(channel, config, sessionHandler);
     }
 
-    protected DefaultSmppSession createSession(Channel channel, SmppSessionConfiguration config, SmppSessionHandler sessionHandler) throws SmppTimeoutException, SmppChannelException, InterruptedException {
+   
+
+	protected DefaultSmppSession createSession(Channel channel, SmppSessionConfiguration config, SmppSessionHandler sessionHandler) throws SmppTimeoutException, SmppChannelException, InterruptedException {
         DefaultSmppSession session = new DefaultSmppSession(SmppSession.Type.CLIENT, config, channel, sessionHandler, monitorExecutor);
 
 	// add SSL handler 
@@ -269,35 +271,49 @@ public class DefaultSmppClient implements SmppClient {
         return session;
     }
 
-    protected Channel createConnectedChannel(String host, int port, long connectTimeoutMillis) throws SmppTimeoutException, SmppChannelException, InterruptedException {
-        // a socket address used to "bind" to the remote system
-        InetSocketAddress socketAddr = new InetSocketAddress(host, port);
+	 protected Channel createConnectedChannel(SmppSessionConfiguration config) throws SmppTimeoutException, SmppChannelException, InterruptedException {
+	        // a socket address used to "bind" to the remote system
+	        InetSocketAddress remoteSocketAddr = new InetSocketAddress(config.getHost(), config.getPort());
+	        InetSocketAddress localSocketAddr =buildLocalSocketAddress(config.getLocalAddress(),config.getLocalPort());
 
-	// set the timeout
-	this.clientBootstrap.setOption("connectTimeoutMillis", connectTimeoutMillis);
+	        // set the timeout
+	        this.clientBootstrap.setOption("connectTimeoutMillis", config.getConnectTimeout());
 
-        // attempt to connect to the remote system
-        ChannelFuture connectFuture = this.clientBootstrap.connect(socketAddr);
-        
-        // wait until the connection is made successfully
-	// boolean timeout = !connectFuture.await(connectTimeoutMillis);
-	// BAD: using .await(timeout)
-	//      see http://netty.io/3.9/api/org/jboss/netty/channel/ChannelFuture.html
-	connectFuture.awaitUninterruptibly();
-	//assert connectFuture.isDone();
+	        // attempt to connect to the remote system
+	        ChannelFuture connectFuture = connect(remoteSocketAddr, localSocketAddr);
 
-	if (connectFuture.isCancelled()) {
-	    throw new InterruptedException("connectFuture cancelled by user");
-	} else if (!connectFuture.isSuccess()) {
-	    if (connectFuture.getCause() instanceof org.jboss.netty.channel.ConnectTimeoutException) {
-		throw new SmppChannelConnectTimeoutException("Unable to connect to host [" + host + "] and port [" + port + "] within " + connectTimeoutMillis + " ms", connectFuture.getCause());
-	    } else {
-		throw new SmppChannelConnectException("Unable to connect to host [" + host + "] and port [" + port + "]: " + connectFuture.getCause().getMessage(), connectFuture.getCause());
+	        // wait until the connection is made successfully
+	        // boolean timeout = !connectFuture.await(connectTimeoutMillis);
+	        // BAD: using .await(timeout)
+	        //      see http://netty.io/3.9/api/org/jboss/netty/channel/ChannelFuture.html
+	        connectFuture.awaitUninterruptibly();
+	        //assert connectFuture.isDone();
+
+	        if (connectFuture.isCancelled()) {
+	                throw new InterruptedException("connectFuture cancelled by user");
+	        } else if (!connectFuture.isSuccess()) {
+	                if (connectFuture.getCause() instanceof org.jboss.netty.channel.ConnectTimeoutException) {
+	                        throw new SmppChannelConnectTimeoutException("Unable to connect to host [" + config.getHost() + "] and port [" + config.getPort() + "] within " + config.getBindTimeout() + " ms", connectFuture.getCause());
+	                } else {
+	                        throw new SmppChannelConnectException("Unable to connect to host [" + config.getHost() + "] and port [" + config.getPort() + "]: " + connectFuture.getCause().getMessage(), connectFuture.getCause());
+	                }
+	        }
+
+	        // if we get here, then we were able to connect and get a channel
+	        return connectFuture.getChannel();
 	    }
-	}
 
-        // if we get here, then we were able to connect and get a channel
-        return connectFuture.getChannel();
-    }
+	    private InetSocketAddress buildLocalSocketAddress(String localAddress, int localPort) {
+	        if(localAddress!=null && !localAddress.isEmpty())
+	                return new InetSocketAddress(localAddress, localPort);
+	        return null;
+	    }
+
+	    private ChannelFuture connect(InetSocketAddress remoteSocketAddr,InetSocketAddress localSocketAddr) {
+	        if(localSocketAddr!=null)
+	                return this.clientBootstrap.connect(remoteSocketAddr,localSocketAddr);
+	        return this.clientBootstrap.connect(remoteSocketAddr);
+
+	    }
 
 }
