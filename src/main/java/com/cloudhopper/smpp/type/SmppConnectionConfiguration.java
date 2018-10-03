@@ -32,7 +32,8 @@ public class SmppConnectionConfiguration {
     private String host;
     private int port;
     private long connectTimeout;
-
+    private String localAddress;
+    private int localPort;
     public SmppConnectionConfiguration() {
         this(null, 0, SmppConstants.DEFAULT_CONNECT_TIMEOUT);
     }
@@ -66,5 +67,21 @@ public class SmppConnectionConfiguration {
     public long getConnectTimeout() {
         return this.connectTimeout;
     }
+
+	public String getLocalAddress() {
+		return localAddress;
+	}
+
+	public void setLocalAddress(String localAddress) {
+		this.localAddress = localAddress;
+	}
+
+	public int getLocalPort() {
+		return localPort;
+	}
+
+	public void setLocalPort(int localPort) {
+		this.localPort = localPort;
+	}
 
 }
